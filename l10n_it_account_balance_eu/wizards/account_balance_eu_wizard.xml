@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<odoo>
+    <record model="ir.ui.view" id="account_balance_eu_wizard_view">
+        <field name="name">account.balance.eu.wizard.form</field>
+        <field name="model">account.balance.eu.wizard</field>
+        <field name="arch" type="xml">
+            <form>
+                <script>
+                    $(document).ready(function(){
+                    $(".o_cp_bottom_left").hide();
+                    });
+                </script>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="default_name" />
+                            <field name="default_date_from" />
+                            <field name="default_date_to" />
+                        </group>
+                        <group>
+                            <field name="default_balance_type" />
+                            <field name="default_hide_acc_amount_0" />
+                            <field name="default_only_posted_move" />
+                        </group>
+                    </group>
+                    <footer>
+                        <button
+                            type="object"
+                            name="balance_eu_html_report"
+                            string="Visualizza"
+                            class="oe_highlight"
+                            default_focus="1"
+                            attrs="{'invisible':['|', ('default_date_to', '=', False), ('default_date_from', '=', False)]}"
+                        />
+                        or
+                        <button
+                            type="object"
+                            name="balance_eu_xlsx_report"
+                            string="Esporta Excel"
+                            attrs="{'invisible':['|', ('default_date_to', '=', False), ('default_date_from', '=', False)]}"
+                        />
+                        or
+                        <button
+                            type="object"
+                            name="create_balance_eu_xbrl"
+                            string="Esporta XBRL"
+                            attrs="{'invisible':['|', ('default_date_to', '=', False), ('default_date_from', '=', False)]}"
+                        />
+                        or
+                        <button special="cancel" string="Cancel" class="oe_link" />
+                        <div
+                            attrs="{'invisible': [('log_warnings', '=', '')]}"
+                            style="border: solid 1px;
+                                color: #721c24;
+                                background-color: #f8d7da; border-color: #f5c6cb;
+                                padding-left: 10px;padding-top:5px;margin-top: 10px;"
+                        >
+                            <field name="log_warnings" readonly="1" />
+                        </div>
+                        <field name="state" invisible="1" />
+
+                        <field
+                            name="balance_log_ids"
+                            string=""
+                            widget="section_and_note_one2many"
+                            mode="tree,kanban"
+                            attrs="{'invisible': [('state','!=','UNLINKED_ACCOUNTS')]}"
+                        >
+                            <tree>
+                                <field name="account_id" />
+                                <field name="amount" />
+                            </tree>
+                        </field>
+                    </footer>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!--  Azione che apre il wizard di calcolo del bilancio -->
+    <record model="ir.actions.act_window" id="action_account_balance_eu_wizard">
+        <field name="name">Calcola Bilancio UE</field>
+        <field name="res_model">account.balance.eu.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <!-- Oggetto menu che apre il wizard per il calcolo del bilancio UE -->
+    <record model="ir.ui.menu" id="account_balance_eu_wizard_menu">
+        <field name="name">Bilancio UE</field>
+        <field name="parent_id" ref="account.menu_finance_reports" />
+        <field name="action" ref="action_account_balance_eu_wizard" />
+        <field name="sequence" eval="75" />
+    </record>
+
+    <record model="ir.ui.view" id="account_balance_eu_log_view">
+        <field name="name">account.balance.eu.log.form</field>
+        <field name="model">account.balance.eu.log</field>
+        <field name="arch" type="xml">
+            <form>
+                <field name="account_id" />
+            </form>
+        </field>
+    </record>
+
+</odoo>
