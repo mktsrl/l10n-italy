@@ -1,4 +1,3 @@
-import base64
 import operator
 from datetime import date
 
@@ -13,17 +12,17 @@ def my_round(val, precision):
 
 class AccountBalanceEULog(models.TransientModel):
     _name = "account.balance.eu.log"
-    _description = "Log delle estrazioni fatte per il calcolo bilancio UE"
-    balance_id = fields.Many2one("account.balance.eu.wizard", string="Bilancio")
+    _description = "Unlinked account in balance EU"
+    balance_id = fields.Many2one("account.balance.eu.wizard", string="Balance")
     account_id = fields.Many2one(
-        "account.account", string="Conto non associato", readonly=True
+        "account.account", string="Account unlinked", readonly=True
     )
-    amount = fields.Float(string="Saldo", readonly=True)
+    amount = fields.Float(string="Amount", readonly=True)
 
 
 class CreateBalanceWizard(models.TransientModel):
     _name = "account.balance.eu.wizard"
-    _description = "Wizard per calcolo bilancio UE"
+    _description = "Wizard for balance UE calculation"
 
     def _default_date_from(self):
         return date(date.today().year - 1, 1, 1)
@@ -31,17 +30,19 @@ class CreateBalanceWizard(models.TransientModel):
     def _default_date_to(self):
         return date(date.today().year - 1, 12, 31)
 
-    # CAMPI DA CHIEDERE
-    default_name = fields.Char(string="Descrizione")
+    default_name = fields.Char(string="Description")
     default_date_from = fields.Date(
-        string="Data inizio bilancio", default=_default_date_from
+        string="Balance from date",
+        default=_default_date_from,
     )
-    default_date_to = fields.Date(string="Data fine bilancio", default=_default_date_to)
+    default_date_to = fields.Date(
+        string="Balance to date",
+        default=_default_date_to,
+    )
     default_balance_type = fields.Selection(
         [
-            ("d", "2 decimali di Euro"),
-            ("u", "unità di Euro"),
-            # ('m', 'Migliaia di Euro')
+            ("d", "2 decimals Euro"),
+            ("u", "euro units"),
         ],
         string="Values show as",
         default="d",
@@ -53,37 +54,36 @@ class CreateBalanceWizard(models.TransientModel):
     default_only_posted_move = fields.Boolean(
         string="Use only posted registration", default=True
     )
-    log_warnings = fields.Text(string="ATTENZIONE:", default="")
+    log_warnings = fields.Text(string="WARNING:", default="")
     # CAMPI TESTATA BILANCIO
-    company_id = fields.Many2one("res.company", string="Azienda")
-    name = fields.Char(string="Etichetta", compute="_compute_period_data")
-    year = fields.Integer(string="Anno", compute="_compute_period_data")
-    currency_id = fields.Many2one("res.currency", string="Valuta")
-    date_from = fields.Date(string="Data inizio", compute="_compute_period_data")
-    date_to = fields.Date(string="Data fine", compute="_compute_period_data")
+    company_id = fields.Many2one("res.company", string="Company")
+    name = fields.Char(string="Name", compute="_compute_period_data")
+    year = fields.Integer(string="Year", compute="_compute_period_data")
+    currency_id = fields.Many2one("res.currency", string="Currency")
+    date_from = fields.Date(string="From date", compute="_compute_period_data")
+    date_to = fields.Date(string="To date", compute="_compute_period_data")
     # dati dell'azienda
-    company_name = fields.Char(string="Ragione Sociale")
-    address = fields.Char(string="Indirizzo")
-    city = fields.Char(string="Città")
-    rea_office = fields.Char(string="Ufficio REA")
-    rea_num = fields.Char(string="Numero REA")
-    rea_capital = fields.Float(string="Capitale Sociale")
-    fiscalcode = fields.Char(string="Codice Fiscale")
-    vat_code = fields.Char(string="Partita IVA")
-    vat_code_nation = fields.Char(string="Paese Partita IVA")
-    chief_officer_name = fields.Char(string="Responsabile")
-    chief_officer_role = fields.Char(string="Carica del Responsabile")
-    # lista con le voci del bilancio (id, tot)
+    company_name = fields.Char(string="Company Name")
+    address = fields.Char(string="Address")
+    city = fields.Char(string="City")
+    rea_office = fields.Char(string="REA office")
+    rea_num = fields.Char(string="REA number")
+    rea_capital = fields.Float(string="Social Capital")
+    fiscalcode = fields.Char(string="Fiscal Code")
+    vat_code = fields.Char(string="VAT number")
+    vat_code_nation = fields.Char(string="VAT number nation")
+    chief_officer_name = fields.Char(string="Chief officer")
+    chief_officer_role = fields.Char(string="Chief officer role")
     balance_log_ids = fields.One2many(
         "account.balance.eu.log", "balance_id", auto_join=True
     )
     state = fields.Selection(
         [
-            ("OK", "COMPLETO"),
-            ("UNLINKED_ACCOUNTS", "VERIFICARE CONTI"),
-            ("UNBALANCED", "NON QUADRATO"),
+            ("OK", "COMPLETE"),
+            ("UNLINKED_ACCOUNTS", "CHECK ACCOUNTS"),
+            ("UNBALANCED", "UNBALANCED"),
         ],
-        string="Stato",
+        string="State",
         default="OK",
         readonly=True,
     )
@@ -94,10 +94,7 @@ class CreateBalanceWizard(models.TransientModel):
         for balance in self:
             balance.date_to = balance.default_date_to
             balance.date_from = balance.default_date_from
-            balance.year = (
-                balance.date_to.year
-            )  # Anno su cui viene effettuato il calcolo: proviamo a mettere l'anno del date_to
-
+            balance.year = balance.date_to.year
             if balance.default_name:
                 balance.name = balance.default_name
             else:
@@ -214,22 +211,19 @@ class CreateBalanceWizard(models.TransientModel):
         return balance_line_amount
 
     def get_balance_ue_data(self):
-        self.company_id = self.env.company  # VALUTA: company corrente
-        self.currency_id = (
-            self.env.company.currency_id
-        )  # VALUTA: currency_id della company
-        self.company_name = self.env.company.name  # Ragione Sociale name
-        self.address = self.env.company.street  # Indirizzo street
+        self.company_id = self.env.company
+        self.currency_id = self.env.company.currency_id
+        self.company_name = self.env.company.name
+        self.address = self.env.company.street
         self.city = self.env.company.zip + " " + self.env.company.city
-        # Registro Imprese
         self.rea_office = self.env.company.rea_office.code or ""
-        self.rea_num = self.env.company.rea_code or ""  # REA
-        self.rea_capital = self.env.company.rea_capital  # Capitale Sociale
-        self.fiscalcode = self.env.company.fiscalcode  # Codice Fiscale fiscalcode
+        self.rea_num = self.env.company.rea_code or ""
+        self.rea_capital = self.env.company.rea_capital
+        self.fiscalcode = self.env.company.fiscalcode
         self.vat_code = self.env.company.vat or ""
         self.vat_code_nation = ""
-        self.chief_officer_role = ""  # Ruolo Responsabile
-        self.chief_officer_name = ""  # Responsabile
+        self.chief_officer_role = ""
+        self.chief_officer_name = ""
 
         if (len(self.vat_code) == 13) and self.vat_code.startswith("IT"):
             self.vat_code_nation = self.vat_code[0:2]
@@ -240,7 +234,7 @@ class CreateBalanceWizard(models.TransientModel):
             account_balance_eu_amount = 0
             account_list = []
             if not item.child_ids:
-                calcoli = ["d", "a"]  # dare, avere
+                calcoli = ["d", "a"]  # d=debit a=credit
                 for calc_type in calcoli:
                     account_balance_eu_amount = self.get_account_list_amount(
                         calc_type,
@@ -348,7 +342,8 @@ class CreateBalanceWizard(models.TransientModel):
         ):
             self.state = "UNBALANCED"
             self.log_warnings = (
-                "Bilancio NON quadrato: {} (Attivo) - {} (Passivo) = {}".format(
+                "Bilancio NON quadrato: {:.2f} (Attivo) "
+                "- {:.2f} (Passivo) = {:.2f}".format(
                     self.balance_ue_lines["PA"]["rounded_amount"],
                     self.balance_ue_lines["PP"]["rounded_amount"],
                     my_round(
@@ -357,15 +352,14 @@ class CreateBalanceWizard(models.TransientModel):
                         2,
                     ),
                 )
-                + "\n"
             )
         else:
             self.log_warnings = ""
         if len(unlinked_account) > 0:
             self.state = "UNLINKED_ACCOUNTS"
             self.log_warnings += (
-                "\nSono presenti conti movimentati nel periodo che non sono associati  "
-                "a nessuna voce di bilancio\n"
+                "\nSono presenti conti movimentati nel "
+                "periodo che non sono associati a nessuna voce di bilancio:\n"
             )
             for acc in unlinked_account:
                 account_id = (
@@ -384,6 +378,7 @@ class CreateBalanceWizard(models.TransientModel):
         data = {
             "form_data": self.read()[0],
             "balance_ue_lines": balance_ue_lines_report_data,
+            "warnings": self.log_warnings.split("\n"),
             "unlinked_account": unlinked_account,
         }
         return data
@@ -400,220 +395,8 @@ class CreateBalanceWizard(models.TransientModel):
             "l10n_it_account_balance_eu.action_report_balance_eu_xlsx"
         ).report_action(self, data=balance_data)
 
-    def get_xbrl_data_tag(self, field, str_year, value, decimal_precision=-1):
-        complete_field = "itcc-ci:" + field
-        if decimal_precision >= 0:
-            altri_attr = ' unitRef="eur" decimals="{}"'.format(decimal_precision)
-            value = f"{value:.{decimal_precision}f}"
-        else:
-            altri_attr = ""
-        return """
-    <{} contextRef="{}"{}>{}</{}>""".format(
-            complete_field, str_year, altri_attr, value, complete_field
-        )
-
-    def get_balance_line_tags(
-        self, balance_line_id, balance_ue_lines, str_year, decimal_precision
-    ):
-        result = ""
-        for child in balance_line_id.child_ids:
-            result += self.get_balance_line_tags(
-                child, balance_ue_lines, str_year, decimal_precision
-            )
-        if balance_line_id.tag_xbrl:
-            amount = None
-            i = 0
-            while (amount is None) and (i < len(balance_ue_lines)):
-                if balance_ue_lines[i]["code"] == balance_line_id["code"]:
-                    amount = balance_ue_lines[i]["amount"]
-                i += 1
-            if amount is not None:
-                result += self.get_xbrl_data_tag(
-                    balance_line_id.tag_xbrl, str_year, amount, decimal_precision
-                )
-        return result
-
-    def create_balance_eu_xbrl(self):
-        balance_ue_data = self.get_balance_ue_data()
-        balance_form_data = balance_ue_data["form_data"]
-        xbrl_name = str(balance_form_data["year"]) + "-XBRL-bilancio-esercizio.xbrl"
-        i_year = "i_" + str(balance_form_data["year"])
-        d_year = "d_" + str(balance_form_data["year"])
-        xbrl = """<?xml version = "1.0" encoding = "UTF-8"?>
-<xbrl xmlns="http://www.xbrl.org/2003/instance"
-        xmlns:link="http://www.xbrl.org/2003/linkbase"
-        xmlns:xlink="http://www.w3.org/1999/xlink"
-        xmlns:iso4217="http://www.xbrl.org/2003/iso4217"
-        xmlns:xbrli="http://www.xbrl.org/2003/instance"
-        xmlns:itcc-ci="http://www.infocamere.it/itnn/fr/itcc/ci/2018-11-04"
-        xmlns:itcc-ci-ese="http://www.infocamere.it/itnn/fr/itcc/ci/ese/2018-11-04">
-    <link:schemaRef xlink:type="simple"
-        xlink:arcrole="http://www.w3.org/1999/xlink/properties/linkbase"
-        xlink:href="itcc-ci-ese-2018-11-04.xsd"/>"""
-
-        xbrl += """
-    <context id="{}">
-        <entity>
-          <identifier scheme="http://www.infocamere.it">{}</identifier>
-        </entity>
-        <period>
-          <instant>{}</instant>
-        </period>
-        <scenario>
-          <itcc-ci-ese:scen>Depositato</itcc-ci-ese:scen>
-        </scenario>
-    </context>""".format(
-            i_year,
-            balance_form_data["fiscalcode"],
-            balance_form_data["default_date_to"],
-        )
-
-        xbrl += """
-    <context id="{}">
-        <entity>
-          <identifier scheme="http://www.infocamere.it">{}</identifier>
-        </entity>
-        <period>
-          <startDate>{}</startDate>
-          <endDate>{}</endDate>
-        </period>
-        <scenario>
-          <itcc-ci-ese:scen>Depositato</itcc-ci-ese:scen>
-        </scenario>
-    </context>""".format(
-            d_year,
-            balance_form_data["fiscalcode"],
-            balance_form_data["default_date_from"],
-            balance_form_data["default_date_to"],
-        )
-        xbrl += """
-    <unit id="eur">
-        <measure>iso4217:EUR</measure>
-    </unit>
-    <unit id="shares">
-        <measure>xbrli:shares</measure>
-    </unit>
-    <unit id="pure">
-        <measure>xbrli:pure</measure>
-    </unit>
-    """
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiDenominazione", i_year, balance_form_data["company_name"]
-        )
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiSede",
-            i_year,
-            balance_form_data["address"]
-            + " - "
-            + self.env.company.zip
-            + " - "
-            + self.env.company.city,
-        )
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiCapitaleSociale", i_year, balance_form_data["rea_capital"], 0
-        )
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiCapitaleSocialeInteramenteVersato", i_year, "true"
-        )
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiCodiceCciaa", i_year, balance_form_data["rea_office"]
-        )
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiPartitaIva", i_year, balance_form_data["vat_code"]
-        )
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiCodiceFiscale", i_year, balance_form_data["fiscalcode"]
-        )
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiNumeroRea",
-            i_year,
-            balance_form_data["rea_office"] + " " + balance_form_data["rea_num"],
-        )
-        xbrl += self.get_xbrl_data_tag("DatiAnagraficiFormaGiuridica", i_year, "")
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiSettoreAttivitaPrevalenteAteco", i_year, ""
-        )
-        if self.env.company.rea_liquidation_state == "LS":
-            tmp_s = "true"
-        else:
-            tmp_s = "false"
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiSocietaLiquidazione", i_year, tmp_s
-        )
-        if self.env.company.rea_member_type == "SU":
-            tmp_s = "true"
-        else:
-            tmp_s = "false"
-        xbrl += self.get_xbrl_data_tag("DatiAnagraficiSocietaSocioUnico", i_year, tmp_s)
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiSocietaSottopostaAltruiAttivitaDirezioneCoordinamento",
-            i_year,
-            "false",
-        )
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiDenominazioneSocietaEnteEsercitaAttivitaDirezioneCoordinamento",
-            i_year,
-            "",
-        )
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiAppartenenzaGruppo", i_year, "false"
-        )
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiDenominazioneSocietaCapogruppo", i_year, ""
-        )
-        xbrl += self.get_xbrl_data_tag("DatiAnagraficiPaeseCapogruppo", i_year, "")
-        xbrl += self.get_xbrl_data_tag(
-            "DatiAnagraficiNumeroIscrizioneAlboCooperative", i_year, ""
-        )
-
-        if balance_form_data["default_balance_type"] == "d":
-            decimal_precision = 2
-        else:
-            decimal_precision = 0
-        tmp_balance_lines = self.env["account.balance.eu"].search([("code", "=", "PA")])
-        if len(tmp_balance_lines) == 1:
-            xbrl += self.get_balance_line_tags(
-                tmp_balance_lines[0],
-                balance_ue_data["balance_ue_lines"],
-                i_year,
-                decimal_precision,
-            )
-        tmp_balance_lines = self.env["account.balance.eu"].search([("code", "=", "PP")])
-        if len(tmp_balance_lines) == 1:
-            xbrl += self.get_balance_line_tags(
-                tmp_balance_lines[0],
-                balance_ue_data["balance_ue_lines"],
-                i_year,
-                decimal_precision,
-            )
-        tmp_balance_lines = self.env["account.balance.eu"].search([("code", "=", "E")])
-        if len(tmp_balance_lines) == 1:
-            xbrl += self.get_balance_line_tags(
-                tmp_balance_lines[0],
-                balance_ue_data["balance_ue_lines"],
-                d_year,
-                decimal_precision,
-            )
-
-        xbrl += "\n</xbrl>"
-        xbrl = xbrl.encode("ascii")
-
-        # get base url
-        base_url = self.env["ir.config_parameter"].get_param("web.base.url")
-        attachment_obj = self.env["ir.attachment"]
-        # create attachment
-        attachment = attachment_obj.create(
-            {
-                "name": xbrl_name,
-                "mimetype": "application/xml",
-                "datas": base64.b64encode(xbrl),
-            }
-        )
-        # prepare download url
-        download_url = "/web/content/" + str(attachment.id) + "?download=true"
-        # download
-        return {
-            "type": "ir.actions.act_url",
-            "url": str(base_url) + str(download_url),
-            "target": "new",
-        }
+    def balance_eu_xbrl_report(self):
+        balance_data = self.get_balance_ue_data()
+        return self.env.ref(
+            "l10n_it_account_balance_eu.action_report_balance_eu_xbrl"
+        ).report_action(self, data=balance_data)
