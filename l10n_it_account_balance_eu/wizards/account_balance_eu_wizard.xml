@@ -5,11 +5,6 @@
         <field name="model">account.balance.eu.wizard</field>
         <field name="arch" type="xml">
             <form>
-                <script>
-                    $(document).ready(function(){
-                    $(".o_cp_bottom_left").hide();
-                    });
-                </script>
                 <sheet>
                     <group>
                         <group>
@@ -42,7 +37,7 @@
                         or
                         <button
                             type="object"
-                            name="create_balance_eu_xbrl"
+                            name="balance_eu_xbrl_report"
                             string="Esporta XBRL"
                             attrs="{'invisible':['|', ('default_date_to', '=', False), ('default_date_from', '=', False)]}"
                         />

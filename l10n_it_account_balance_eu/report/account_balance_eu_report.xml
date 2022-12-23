@@ -13,19 +13,9 @@
         <field name="binding_model_id" ref="model_account_balance_eu_wizard" />
 <!--        <field name="binding_type">report</field>-->
     </record>
-    <record model="ir.actions.report" id="action_report_balance_eu_xlsx">
-        <field name="name">Bilancio Excel</field>
-        <field name="model">account.balance.eu.wizard</field>
-        <field name="report_type">xlsx</field>
-        <field
-            name="report_name"
-        >l10n_it_account_balance_eu.balance_eu_xlsx_report</field>
-        <field name="report_file">Bilancio</field>
-        <field name="binding_model_id" ref="model_account_balance_eu_wizard" />
-    </record>
     <template id="balance_eu_html_report">
         <t t-call="web.html_container">
-            <t t-call="web.internal_layout">
+            <t t-call="l10n_it_account_balance_eu.internal_layout">
                 <div>
                     <h1>
                         <t t-esc="form_data['company_name']" />
@@ -132,5 +122,25 @@
             </t>
         </t>
     </template>
+    <record model="ir.actions.report" id="action_report_balance_eu_xlsx">
+        <field name="name">Bilancio Excel</field>
+        <field name="model">account.balance.eu.wizard</field>
+        <field name="report_type">xlsx</field>
+        <field
+            name="report_name"
+        >l10n_it_account_balance_eu.balance_eu_xlsx_report</field>
+        <field name="report_file">Bilancio</field>
+        <field name="binding_model_id" ref="model_account_balance_eu_wizard" />
+    </record>
+    <record model="ir.actions.report" id="action_report_balance_eu_xbrl">
+        <field name="name">Bilancio XBRL</field>
+        <field name="model">account.balance.eu.wizard</field>
+        <field name="report_type">qweb-xml</field>
+        <field
+            name="report_name"
+        >l10n_it_account_balance_eu.balance_eu_xbrl_report</field>
+        <field name="report_file">XBRL-bilancio-esercizio.xbrl</field>
+        <field name="binding_model_id" ref="model_account_balance_eu_wizard" />
+    </record>
 
 </odoo>
