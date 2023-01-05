@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <record model="ir.actions.report" id="action_report_balance_eu_xml">
-        <field name="name">Bilancio</field>
+    <record id="action_report_balance_eu_xml" model="ir.actions.report">
+        <field name="name">Balance</field>
         <field name="model">account.balance.eu.wizard</field>
         <field name="report_type">qweb-html</field>
         <field
@@ -16,47 +16,77 @@
     <template id="balance_eu_html_report">
         <t t-call="web.html_container">
             <t t-call="l10n_it_account_balance_eu.internal_layout">
+                <t t-if="len(warnings)>0">
+                    <div class="warnings">
+                        <t t-foreach="warnings" t-as="msg">
+                            <t t-esc="msg" /><br />
+                        </t>
+                        <t t-if="len(unlinked_account)>0">
+                            <table>
+                                <t t-foreach="unlinked_account" t-as="conto">
+                                    <tr class="account_row">
+                                        <td>
+                                            <span t-esc="conto['code']" />
+                                        </td>
+                                        <td>
+                                            <span t-esc="conto['desc']" />
+                                        </td>
+                                        <td style="text-align: right">
+                                            <span
+                                                t-esc="conto['amount']"
+                                                t-options='{"widget": "float", "precision": 2}'
+                                            />
+                                        </td>
+                                    </tr>
+                                </t>
+                            </table>
+                        </t>
+                    </div>
+                    <br />
+                </t>
+
                 <div>
-                    <h1>
+                    <h2>
                         <t t-esc="form_data['company_name']" />
-                    </h1>
-                    <h5>
+                    </h2>
+                    <h6>
                         <t t-esc="form_data['address']" />
                         -
                         <t t-esc="form_data['city']" />
                         <br />
-                        P.IVA
+                        Taxcode
                         <t t-esc="form_data['vat_code_nation']" />
                         <t t-esc="form_data['vat_code']" />
-                        - Cod.Fisc.
+                        - Fiscal Code
                         <t t-esc="form_data['fiscalcode']" />
                         <br />
-                        Capitale sociale Euro
+                        Social capital Euro
                         <t t-esc="form_data['rea_capital']" />
                         - REA: <t t-esc="form_data['rea_office']" />-<t
                             t-esc="form_data['rea_num']"
                         />
-                    </h5>
+                    </h6>
                     <h3>
                         <t t-esc="form_data['name']" />
                     </h3>
-                    dal
-                    <t
-                        t-esc="form_data['date_from']"
-                        t-options='{"widget": "date","format": "dd/MM/yyyy"}'
-                    />
-                    al
-                    <t
-                        t-esc="form_data['date_to']"
-                        t-options='{"widget": "date","format": "dd/MM/yyyy"}'
-                    />
-                    <br />
+                    <div class="period">
+                        from
+                        <t
+                            t-esc="form_data['date_from']"
+                            t-options='{"widget": "date","format": "dd/MM/yyyy"}'
+                        />
+                        to
+                        <t
+                            t-esc="form_data['date_to']"
+                            t-options='{"widget": "date","format": "dd/MM/yyyy"}'
+                        />
+                    </div>
                 </div>
                 <table>
                     <t t-foreach="balance_ue_lines" t-as="line">
                         <tr>
                             <td>
-                                <span t-esc="line['code']" /> <!--codice voce-->
+                                <span t-esc="line['code']" />
                             </td>
                             <td>
                                 <t t-foreach="range(len(line['code'])-3)" t-as="c">
@@ -80,7 +110,7 @@
                             </td>
                         </tr>
                         <t t-foreach="line['accounts']" t-as="conto">
-                            <tr style="font-size:0.8em; font-style: italic;">
+                            <tr class="account_row account_row_background">
                                 <td>
                                     <span t-esc="conto['code']" />
                                 </td>
@@ -97,43 +127,21 @@
                         </t>
                     </t>
                 </table>
-                <t t-if="len(unlinked_account)>0">
-                    <br />
-                    <h3>CONTI DA ASSOCIARE A UNA VOCE DI BILANCIO:</h3>
-                    <table>
-                        <t t-foreach="unlinked_account" t-as="conto">
-                            <tr style="font-size:0.8em; font-style: italic;">
-                                <td>
-                                    <span t-esc="conto['code']" />
-                                </td>
-                                <td>
-                                    <span t-esc="conto['desc']" />
-                                </td>
-                                <td style="text-align: right">
-                                    <span
-                                        t-esc="conto['amount']"
-                                        t-options='{"widget": "float", "precision": 2}'
-                                    />
-                                </td>
-                            </tr>
-                        </t>
-                    </table>
-                </t>
             </t>
         </t>
     </template>
-    <record model="ir.actions.report" id="action_report_balance_eu_xlsx">
-        <field name="name">Bilancio Excel</field>
+    <record id="action_report_balance_eu_xlsx" model="ir.actions.report">
+        <field name="name">Balance XLSX</field>
         <field name="model">account.balance.eu.wizard</field>
         <field name="report_type">xlsx</field>
         <field
             name="report_name"
         >l10n_it_account_balance_eu.balance_eu_xlsx_report</field>
-        <field name="report_file">Bilancio</field>
+        <field name="report_file">Balance</field>
         <field name="binding_model_id" ref="model_account_balance_eu_wizard" />
     </record>
-    <record model="ir.actions.report" id="action_report_balance_eu_xbrl">
-        <field name="name">Bilancio XBRL</field>
+    <record id="action_report_balance_eu_xbrl" model="ir.actions.report">
+        <field name="name">Balance XBRL</field>
         <field name="model">account.balance.eu.wizard</field>
         <field name="report_type">qweb-xml</field>
         <field

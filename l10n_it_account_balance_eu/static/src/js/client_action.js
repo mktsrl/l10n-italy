@@ -54,10 +54,12 @@ odoo.define("l10n_it_account_balance_eu.client_action", function (require) {
 
         on_click_xbrl: function () {
             const action = {
+                name: this.name,
+                print_report_name:
+                    String(this.data.year) + "-XBRL-bilancio-esercizio.xbrl",
                 type: "ir.actions.report",
                 report_type: "qweb-xml",
                 report_name: "l10n_it_account_balance_eu.balance_eu_xbrl_report",
-                report_file: String(this.data["year"]) + "-XBRL-bilancio-esercizio.xbrl",
                 data: this.data,
                 context: this.context,
                 display_name: this.title,

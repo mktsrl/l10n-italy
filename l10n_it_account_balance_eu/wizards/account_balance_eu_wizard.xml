@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <odoo>
-    <record model="ir.ui.view" id="account_balance_eu_wizard_view">
+    <record id="account_balance_eu_wizard_view" model="ir.ui.view">
         <field name="name">account.balance.eu.wizard.form</field>
         <field name="model">account.balance.eu.wizard</field>
         <field name="arch" type="xml">
@@ -22,7 +22,7 @@
                         <button
                             type="object"
                             name="balance_eu_html_report"
-                            string="Visualizza"
+                            string="View"
                             class="oe_highlight"
                             default_focus="1"
                             attrs="{'invisible':['|', ('default_date_to', '=', False), ('default_date_from', '=', False)]}"
@@ -31,14 +31,14 @@
                         <button
                             type="object"
                             name="balance_eu_xlsx_report"
-                            string="Esporta Excel"
+                            string="Export XLSX"
                             attrs="{'invisible':['|', ('default_date_to', '=', False), ('default_date_from', '=', False)]}"
                         />
                         or
                         <button
                             type="object"
                             name="balance_eu_xbrl_report"
-                            string="Esporta XBRL"
+                            string="Export XBRL"
                             attrs="{'invisible':['|', ('default_date_to', '=', False), ('default_date_from', '=', False)]}"
                         />
                         or
@@ -72,23 +72,21 @@
         </field>
     </record>
 
-    <!--  Azione che apre il wizard di calcolo del bilancio -->
-    <record model="ir.actions.act_window" id="action_account_balance_eu_wizard">
-        <field name="name">Calcola Bilancio UE</field>
+    <record id="action_account_balance_eu_wizard" model="ir.actions.act_window">
+        <field name="name">Calculate Balance UE</field>
         <field name="res_model">account.balance.eu.wizard</field>
         <field name="view_mode">form</field>
         <field name="target">new</field>
     </record>
 
-    <!-- Oggetto menu che apre il wizard per il calcolo del bilancio UE -->
-    <record model="ir.ui.menu" id="account_balance_eu_wizard_menu">
-        <field name="name">Bilancio UE</field>
+    <record id="account_balance_eu_wizard_menu" model="ir.ui.menu">
+        <field name="name">Balance UE</field>
         <field name="parent_id" ref="account.menu_finance_reports" />
         <field name="action" ref="action_account_balance_eu_wizard" />
         <field name="sequence" eval="75" />
     </record>
 
-    <record model="ir.ui.view" id="account_balance_eu_log_view">
+    <record id="account_balance_eu_log_view" model="ir.ui.view">
         <field name="name">account.balance.eu.log.form</field>
         <field name="model">account.balance.eu.log</field>
         <field name="arch" type="xml">

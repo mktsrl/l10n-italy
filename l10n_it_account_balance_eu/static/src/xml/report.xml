@@ -5,17 +5,17 @@
             <button
                 type="button"
                 class="btn btn-primary o_report_print"
-                title="Print"
+                title="Print PDF"
             >Print PDF</button>
             <button
                 type="button"
                 class="btn btn-secondary o_report_xlsx"
-                title="Export"
+                title="Export XLSX"
             >Export XLSX</button>
             <button
                 type="button"
                 class="btn btn-secondary o_report_xbrl"
-                title="Export"
+                title="Export XBRL"
             >Export XBRL</button>
         </div>
     </t>

@@ -3,7 +3,7 @@ from odoo import models
 
 class BalanceEuXlsxReport(models.AbstractModel):
     _name = "report.l10n_it_account_balance_eu.balance_eu_xlsx_report"
-    _description = "Esportazione del bilancio UE in formato XLSX"
+    _description = "Export EU Balance in XLSX format"
     _inherit = "report.report_xlsx.abstract"
 
     def generate_xlsx_report(self, workbook, data, record_data):

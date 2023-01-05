@@ -2,9 +2,7 @@
 <!-- Copyright 2022 MKT srl
      License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl). -->
 <odoo>
-    <!-- VOCI di BILANCIO: form di inserimento e modifica -->
-<!-- al momento non permetto la modifica di codici e padre/figli perchè troppo rischiso -->
-    <record model="ir.ui.view" id="account_balance_eu_form_view">
+    <record id="account_balance_eu_form_view" model="ir.ui.view">
         <field name="name">account.balance.eu.form</field>
         <field name="model">account.balance.eu</field>
         <field name="arch" type="xml">
@@ -29,35 +27,32 @@
         </field>
     </record>
 
-    <!-- ricerca VOCI di Bilancio-->
-    <record model="ir.ui.view" id="account_balance_eu_search_view">
+    <record id="account_balance_eu_search_view" model="ir.ui.view">
         <field name="name">account.balance.eu.search</field>
         <field name="model">account.balance.eu</field>
         <field name="arch" type="xml">
             <search>
-                <!-- il primo è il default, ipotezzo per la maggior parte delle volte venga cercata (una parte della) descrizione  -->
                 <field name="complete_name" />
                 <field name="name" />
                 <field name="code" />
-
                 <filter
-                    string="ATTIVO (Patrimoniale)"
+                    string="ASSETS (Patrimonial)"
                     name="Attivo"
                     domain="[('zone_bal','=','PA')]"
                 />
                 <filter
-                    string="PASSIVO (Patrimoniale)"
+                    string="LIABILITIES (Patrimonial)"
                     name="Passivo"
                     domain="[('zone_bal','=','PP')]"
                 />
                 <filter
-                    string="CONTO ECONOMICO"
+                    string="INCOME ACCOUNT"
                     name="Economico"
                     domain="[('zone_bal','=','EC')]"
                 />
                 <separator />
                 <filter
-                    string="Solo voci foglie albero"
+                    string="No childs only"
                     name="foglie"
                     domain="[('child_ids','=',False)]"
                 />
@@ -65,8 +60,7 @@
         </field>
     </record>
 
-    <!-- Tree view (vista elenco) VOCI di Bilancio-->
-    <record model="ir.ui.view" id="account_balance_eu_tree_view">
+    <record id="account_balance_eu_tree_view" model="ir.ui.view">
         <field name="name">account.balance.eu.tree</field>
         <field name="model">account.balance.eu</field>
         <field name="arch" type="xml">
@@ -76,37 +70,34 @@
         </field>
     </record>
 
-    <!--  Azione che apre la vista list delle voci di bilancio -->
-    <record model="ir.actions.act_window" id="account_balance_eu_act_window">
-        <field name="name">Voci Bilancio UE</field>
+    <record id="account_balance_eu_act_window" model="ir.actions.act_window">
+        <field name="name">Balance UE lines</field>
         <field name="res_model">account.balance.eu</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[]</field>
         <field name="context">{}</field>
     </record>
 
-    <!-- Oggetto menu che apre la lista delle voci di bilancio -->
-    <record model="ir.ui.menu" id="account_balance_eu_menu">
-        <field name="name">Voci Bilancio UE</field>
+    <record id="account_balance_eu_menu" model="ir.ui.menu">
+        <field name="name">Balance UE lines</field>
         <field name="parent_id" ref="account.account_account_menu" />
         <field name="action" ref="account_balance_eu_act_window" />
         <field name="sequence" eval="16" />
     </record>
 
-   <!-- estensione della form account.account per mettere i campi dare e avere -->
-    <record model="ir.ui.view" id="view_account_form_inherited">
-        <field name="name">account.balance.eu.account.account.form.view</field>
+    <record id="view_account_form_balance_ue" model="ir.ui.view">
+        <field name="name">view.account.form.balance.ue</field>
         <field name="model">account.account</field>
         <field name="inherit_id" ref="account.view_account_form" />
         <field name="arch" type="xml">
             <xpath expr="//group" position="after">
-                <separator string="Associa a Bilancio UE" />
+                <separator string="Link to Balance UE" />
                 <group name="gr_bil_ue">
-                    <group name="gr_bil_ue_dare">
-                        <field name="account_balance_eu_debit_id" string="Dare" />
+                    <group>
+                        <field name="account_balance_eu_debit_id" />
                     </group>
-                    <group name="gr_bil_ue_avere">
-                        <field name="account_balance_eu_credit_id" string="Avere" />
+                    <group>
+                        <field name="account_balance_eu_credit_id" />
                     </group>
                 </group>
             </xpath>

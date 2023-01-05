@@ -12,17 +12,17 @@ def my_round(val, precision):
 
 class AccountBalanceEULog(models.TransientModel):
     _name = "account.balance.eu.log"
-    _description = "Log delle estrazioni fatte per il calcolo bilancio UE"
-    balance_id = fields.Many2one("account.balance.eu.wizard", string="Bilancio")
+    _description = "Unlinked account in balance EU"
+    balance_id = fields.Many2one("account.balance.eu.wizard", string="Balance")
     account_id = fields.Many2one(
-        "account.account", string="Conto non associato", readonly=True
+        "account.account", string="Account unlinked", readonly=True
     )
-    amount = fields.Float(string="Saldo", readonly=True)
+    amount = fields.Float(string="Amount", readonly=True)
 
 
 class CreateBalanceWizard(models.TransientModel):
     _name = "account.balance.eu.wizard"
-    _description = "Wizard per calcolo bilancio UE"
+    _description = "Wizard for balance UE calculation"
 
     def _default_date_from(self):
         return date(date.today().year - 1, 1, 1)
@@ -30,17 +30,19 @@ class CreateBalanceWizard(models.TransientModel):
     def _default_date_to(self):
         return date(date.today().year - 1, 12, 31)
 
-    # CAMPI DA CHIEDERE
-    default_name = fields.Char(string="Descrizione")
+    default_name = fields.Char(string="Description")
     default_date_from = fields.Date(
-        string="Data inizio bilancio", default=_default_date_from
+        string="Balance from date",
+        default=_default_date_from,
     )
-    default_date_to = fields.Date(string="Data fine bilancio", default=_default_date_to)
+    default_date_to = fields.Date(
+        string="Balance to date",
+        default=_default_date_to,
+    )
     default_balance_type = fields.Selection(
         [
-            ("d", "2 decimali di Euro"),
-            ("u", "unità di Euro"),
-            # ('m', 'Migliaia di Euro')
+            ("d", "2 decimals Euro"),
+            ("u", "euro units"),
         ],
         string="Values show as",
         default="d",
@@ -52,37 +54,36 @@ class CreateBalanceWizard(models.TransientModel):
     default_only_posted_move = fields.Boolean(
         string="Use only posted registration", default=True
     )
-    log_warnings = fields.Text(string="ATTENZIONE:", default="")
+    log_warnings = fields.Text(string="WARNING:", default="")
     # CAMPI TESTATA BILANCIO
-    company_id = fields.Many2one("res.company", string="Azienda")
-    name = fields.Char(string="Etichetta", compute="_compute_period_data")
-    year = fields.Integer(string="Anno", compute="_compute_period_data")
-    currency_id = fields.Many2one("res.currency", string="Valuta")
-    date_from = fields.Date(string="Data inizio", compute="_compute_period_data")
-    date_to = fields.Date(string="Data fine", compute="_compute_period_data")
+    company_id = fields.Many2one("res.company", string="Company")
+    name = fields.Char(string="Name", compute="_compute_period_data")
+    year = fields.Integer(string="Year", compute="_compute_period_data")
+    currency_id = fields.Many2one("res.currency", string="Currency")
+    date_from = fields.Date(string="Start date", compute="_compute_period_data")
+    date_to = fields.Date(string="End date", compute="_compute_period_data")
     # dati dell'azienda
-    company_name = fields.Char(string="Ragione Sociale")
-    address = fields.Char(string="Indirizzo")
-    city = fields.Char(string="Città")
-    rea_office = fields.Char(string="Ufficio REA")
-    rea_num = fields.Char(string="Numero REA")
-    rea_capital = fields.Float(string="Capitale Sociale")
-    fiscalcode = fields.Char(string="Codice Fiscale")
-    vat_code = fields.Char(string="Partita IVA")
-    vat_code_nation = fields.Char(string="Paese Partita IVA")
-    chief_officer_name = fields.Char(string="Responsabile")
-    chief_officer_role = fields.Char(string="Carica del Responsabile")
-    # lista con le voci del bilancio (id, tot)
+    company_name = fields.Char(string="Company Name")
+    address = fields.Char(string="Address")
+    city = fields.Char(string="City")
+    rea_office = fields.Char(string="REA office")
+    rea_num = fields.Char(string="REA number")
+    rea_capital = fields.Float(string="Social Capital")
+    fiscalcode = fields.Char(string="Fiscal Code")
+    vat_code = fields.Char(string="VAT number")
+    vat_code_nation = fields.Char(string="VAT number nation")
+    chief_officer_name = fields.Char(string="Chief officer")
+    chief_officer_role = fields.Char(string="Chief officer role")
     balance_log_ids = fields.One2many(
         "account.balance.eu.log", "balance_id", auto_join=True
     )
     state = fields.Selection(
         [
-            ("OK", "COMPLETO"),
-            ("UNLINKED_ACCOUNTS", "VERIFICARE CONTI"),
-            ("UNBALANCED", "NON QUADRATO"),
+            ("OK", "COMPLETE"),
+            ("UNLINKED_ACCOUNTS", "CHECK ACCOUNTS"),
+            ("UNBALANCED", "UNBALANCED"),
         ],
-        string="Stato",
+        string="State",
         default="OK",
         readonly=True,
     )
@@ -93,10 +94,7 @@ class CreateBalanceWizard(models.TransientModel):
         for balance in self:
             balance.date_to = balance.default_date_to
             balance.date_from = balance.default_date_from
-            balance.year = (
-                balance.date_to.year
-            )  # Anno su cui viene effettuato il calcolo: proviamo a mettere l'anno del date_to
-
+            balance.year = balance.date_to.year
             if balance.default_name:
                 balance.name = balance.default_name
             else:
@@ -213,22 +211,19 @@ class CreateBalanceWizard(models.TransientModel):
         return balance_line_amount
 
     def get_balance_ue_data(self):
-        self.company_id = self.env.company  # VALUTA: company corrente
-        self.currency_id = (
-            self.env.company.currency_id
-        )  # VALUTA: currency_id della company
-        self.company_name = self.env.company.name  # Ragione Sociale name
-        self.address = self.env.company.street  # Indirizzo street
+        self.company_id = self.env.company
+        self.currency_id = self.env.company.currency_id
+        self.company_name = self.env.company.name
+        self.address = self.env.company.street
         self.city = self.env.company.zip + " " + self.env.company.city
-        # Registro Imprese
         self.rea_office = self.env.company.rea_office.code or ""
-        self.rea_num = self.env.company.rea_code or ""  # REA
-        self.rea_capital = self.env.company.rea_capital  # Capitale Sociale
-        self.fiscalcode = self.env.company.fiscalcode  # Codice Fiscale fiscalcode
+        self.rea_num = self.env.company.rea_code or ""
+        self.rea_capital = self.env.company.rea_capital
+        self.fiscalcode = self.env.company.fiscalcode
         self.vat_code = self.env.company.vat or ""
         self.vat_code_nation = ""
-        self.chief_officer_role = ""  # Ruolo Responsabile
-        self.chief_officer_name = ""  # Responsabile
+        self.chief_officer_role = ""
+        self.chief_officer_name = ""
 
         if (len(self.vat_code) == 13) and self.vat_code.startswith("IT"):
             self.vat_code_nation = self.vat_code[0:2]
@@ -239,7 +234,7 @@ class CreateBalanceWizard(models.TransientModel):
             account_balance_eu_amount = 0
             account_list = []
             if not item.child_ids:
-                calcoli = ["d", "a"]  # dare, avere
+                calcoli = ["d", "a"]  # d=debit a=credit
                 for calc_type in calcoli:
                     account_balance_eu_amount = self.get_account_list_amount(
                         calc_type,
@@ -347,7 +342,8 @@ class CreateBalanceWizard(models.TransientModel):
         ):
             self.state = "UNBALANCED"
             self.log_warnings = (
-                "Bilancio NON quadrato: {} (Attivo) - {} (Passivo) = {}".format(
+                "Bilancio NON quadrato: {:.2f} (Attivo) "
+                "- {:.2f} (Passivo) = {:.2f}".format(
                     self.balance_ue_lines["PA"]["rounded_amount"],
                     self.balance_ue_lines["PP"]["rounded_amount"],
                     my_round(
@@ -356,15 +352,14 @@ class CreateBalanceWizard(models.TransientModel):
                         2,
                     ),
                 )
-                + "\n"
             )
         else:
             self.log_warnings = ""
         if len(unlinked_account) > 0:
             self.state = "UNLINKED_ACCOUNTS"
             self.log_warnings += (
-                "\nSono presenti conti movimentati nel periodo che non sono associati  "
-                "a nessuna voce di bilancio\n"
+                "\nSono presenti conti movimentati nel "
+                "periodo che non sono associati a nessuna voce di bilancio:\n"
             )
             for acc in unlinked_account:
                 account_id = (
@@ -383,6 +378,7 @@ class CreateBalanceWizard(models.TransientModel):
         data = {
             "form_data": self.read()[0],
             "balance_ue_lines": balance_ue_lines_report_data,
+            "warnings": self.log_warnings.split("\n"),
             "unlinked_account": unlinked_account,
         }
         return data
