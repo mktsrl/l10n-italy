@@ -92,9 +92,9 @@ class AccountBalanceEU(models.Model):
     def _check_code_zone(self):
         for line in self:
             if (line.zone_bal == "PA") and (not line.code.startswith("PA")):
-                raise ValidationError(_("ACTIVE codes must starting by PA"))
+                raise ValidationError(_("ASSETS codes must starting by PA"))
             elif (line.zone_bal == "PP") and (not line.code.startswith("PP")):
-                raise ValidationError(_("PASSIVE codes must starting by PP"))
+                raise ValidationError(_("LIABILITIES codes must starting by PP"))
             elif (line.zone_bal == "EC") and (not line.code.startswith("E")):
                 raise ValidationError(_("INCOME STATEMENT codes must starting by E"))
 
@@ -127,13 +127,13 @@ class AccountRefBalanceEU(models.Model):
     _inherit = "account.account"
     account_balance_eu_debit_id = fields.Many2one(
         "account.balance.eu",
-        string="Dare (Bilancio UE)",
+        string="Debit (Balance UE)",
         domain="[('child_ids','=',False)]",
-        help="inserisci questo conto nel conteggio dei DARE di una voce del Bilancio UE",
+        help="Add this account in a Balance UE line amount DEBITS",
     )
     account_balance_eu_credit_id = fields.Many2one(
         "account.balance.eu",
-        string="Avere (Bilancio UE)",
+        string="Credit (Balance UE)",
         domain="[('child_ids','=',False)]",
-        help="inserisci questo conto nel conteggio degli AVERE di una voce del Bilancio UE",
+        help="Add this account in a Balance UE line amount CREDITS",
     )
