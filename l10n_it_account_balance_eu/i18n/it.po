@@ -511,3 +511,4 @@ msgstr "Esporta XLSX"
 #, python-format
 msgid "Export XBRL"
 msgstr "Esporta XBRL"
+
