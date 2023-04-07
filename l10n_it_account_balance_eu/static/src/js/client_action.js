@@ -6,7 +6,7 @@ odoo.define("l10n_it_account_balance_eu.client_action", function (require) {
 
     var QWeb = core.qweb;
 
-    const AFRReportAction = ReportAction.extend({
+    const BalEUReportAction = ReportAction.extend({
         start: function () {
             return this._super.apply(this, arguments).then(() => {
                 this.$buttons = $(
@@ -70,8 +70,8 @@ odoo.define("l10n_it_account_balance_eu.client_action", function (require) {
 
     core.action_registry.add(
         "l10n_it_account_balance_eu.client_action",
-        AFRReportAction
+        BalEUReportAction
     );
 
-    return AFRReportAction;
+    return BalEUReportAction;
 });

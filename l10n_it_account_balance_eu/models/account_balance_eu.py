@@ -2,6 +2,7 @@
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
 import logging
+import math
 import operator
 
 from babel.numbers import format_decimal
@@ -12,10 +13,9 @@ from odoo.exceptions import ValidationError
 _logger = logging.getLogger(__name__)
 
 
-def my_round(val, precision):
-    # il round arrotonda il 5 al pari più vicino (1.5 -> 2 e 2.5 -> 2)
-    # aggiungo un infinitesimo per farlo arrotondare sempre per eccesso
-    return round(val + 1e-10, precision)
+def round_half_up(val, precision):
+    multiplier = 10**precision
+    return math.floor(val * multiplier + 0.5) / multiplier
 
 
 class AccountBalanceEU(models.Model):
@@ -26,6 +26,7 @@ class AccountBalanceEU(models.Model):
             ("PA", "Assets"),
             ("PP", "Liabilities"),
             ("EC", "Income statement"),
+            ("--", "Ignore"),
         ],
         string="Zone",
         required=True,
@@ -159,7 +160,7 @@ class AccountBalanceEU(models.Model):
             else:
                 rounded_amount += balance_ue_lines[child.code]["rounded_amount"]
                 total_amount += balance_ue_lines[child.code]["total_amount"]
-        balance_ue_lines[code]["rounded_amount"] = my_round(rounded_amount, 2)
+        balance_ue_lines[code]["rounded_amount"] = round_half_up(rounded_amount, 2)
         balance_ue_lines[code]["total_amount"] = total_amount
 
     def add_calc_type_domain(self, domain, calc_type, account_balance_eu_id):
@@ -237,7 +238,7 @@ class AccountBalanceEU(models.Model):
                     )
                     if amls:
                         for line in amls:
-                            acc_amount = my_round(
+                            acc_amount = round_half_up(
                                 line.get("debit") - line.get("credit"),
                                 currency_precision,
                             )
@@ -273,6 +274,14 @@ class AccountBalanceEU(models.Model):
                         )
         return balance_line_amount
 
+    def round_bal_val(self, val, precision):
+        if precision == "u":
+            return round_half_up(val, 0)
+        elif precision == "d":
+            return round_half_up(val, 2)
+        else:
+            return val
+
     def cal_balance_ue_data(self, form_data):
         balance_ue_lines = {}
         company_id = form_data["company_id"][0]
@@ -281,19 +290,12 @@ class AccountBalanceEU(models.Model):
         )
         date_from = form_data["date_from"]
         date_to = form_data["date_to"]
-        only_posted_move = form_data["default_only_posted_move"]
-        hide_acc_amount_0 = form_data["default_hide_acc_amount_0"]
-        ignore_closing_move = form_data["default_ignore_closing_move"]
+        only_posted_move = form_data["only_posted_move"]
+        hide_acc_amount_0 = form_data["hide_acc_amount_0"]
+        ignore_closing_move = form_data["ignore_closing_move"]
         if ignore_closing_move:
-            ignore_closing_move = False
-            if "account_fiscal_year_closing" in self.env["ir.module.module"].search(
-                [("state", "=", "installed")]
-            ).mapped("name"):
-                move_model = self.env["account.move"]
-                if "closing_type" in move_model.fields_get() and move_model.search(
-                    [("closing_type", "!=", False)]
-                ):
-                    ignore_closing_move = True
+            if not self.env["account.move"].fields_get("closing_type"):
+                ignore_closing_move = False
         account_balance_eu_ids = self.search([])  # env["account.balance.eu"].
         for item in account_balance_eu_ids:
             account_balance_eu_amount = 0
@@ -317,16 +319,9 @@ class AccountBalanceEU(models.Model):
                     )
             account_list.sort(key=operator.itemgetter("code"))
 
-            if form_data["default_balance_type"] == "u":
-                account_balance_eu_amount_rounded = my_round(
-                    account_balance_eu_amount, 0
-                )
-            elif form_data["default_balance_type"] == "d":
-                account_balance_eu_amount_rounded = my_round(
-                    account_balance_eu_amount, 2
-                )
-            else:
-                account_balance_eu_amount_rounded = account_balance_eu_amount
+            account_balance_eu_amount_rounded = self.round_bal_val(
+                account_balance_eu_amount, form_data["values_precision"]
+            )
             balance_ue_lines[item.code] = {
                 "balance_line": item,
                 "rounded_amount": account_balance_eu_amount_rounded,
@@ -364,6 +359,21 @@ class AccountBalanceEU(models.Model):
             balance_ue_lines["E=E"]["total_amount"]
             - balance_ue_lines["E.F"]["total_amount"]
         )
+        delta_ef = (
+            self.round_bal_val(
+                balance_ue_lines["E=F"]["total_amount"], form_data["values_precision"]
+            )
+            - balance_ue_lines["E=F"]["rounded_amount"]
+        )
+        if delta_ef != 0:
+            balance_ue_lines["E=A512"]["rounded_amount"] = delta_ef
+            balance_ue_lines["E.A51"]["rounded_amount"] += delta_ef
+            balance_ue_lines["E.A5"]["rounded_amount"] += delta_ef
+            balance_ue_lines["E.A"]["rounded_amount"] += delta_ef
+            balance_ue_lines["E=B"]["rounded_amount"] += delta_ef
+            balance_ue_lines["E=E"]["rounded_amount"] += delta_ef
+            balance_ue_lines["E=F"]["rounded_amount"] += delta_ef
+
         balance_ue_lines["PP=A9"]["rounded_amount"] = balance_ue_lines["E=F"][
             "rounded_amount"
         ]
@@ -379,28 +389,45 @@ class AccountBalanceEU(models.Model):
             balance_ue_lines["PA"]["total_amount"]
             - balance_ue_lines["PP"]["total_amount"]
         )
-        if form_data["default_balance_type"] == "u":
-            balance_ue_lines["PP=A7j2"]["rounded_amount"] = my_round(
-                balance_ue_lines["PP=A7j2"]["total_amount"], 0
-            )
-        elif form_data["default_balance_type"] == "d":
-            balance_ue_lines["PP=A7j2"]["rounded_amount"] = my_round(
-                balance_ue_lines["PP=A7j2"]["total_amount"], 2
-            )
-        else:
-            balance_ue_lines["PP=A7j2"]["rounded_amount"] = balance_ue_lines["PP=A7j2"][
-                "total_amount"
-            ]
+
+        balance_ue_lines["PP=A7j2"]["rounded_amount"] = self.round_bal_val(
+            balance_ue_lines["PP=A7j2"]["total_amount"], form_data["values_precision"]
+        )
         self.cal_balance_ue_line_amount(balance_ue_lines, "PP")
+        log_warnings = ""
+        acc_ignore = ""
         balance_ue_lines_report_data = []
         for line in balance_ue_lines:
-            balance_ue_lines_report_data.append(
-                {
-                    "code": balance_ue_lines[line]["balance_line"].code,
-                    "desc": balance_ue_lines[line]["balance_line"].long_desc,
-                    "amount": balance_ue_lines[line]["rounded_amount"],
-                    "accounts": balance_ue_lines[line]["account_list"],
-                }
+            if balance_ue_lines[line]["balance_line"].zone_bal != "--":
+                balance_ue_lines_report_data.append(
+                    {
+                        "code": balance_ue_lines[line]["balance_line"].code,
+                        "desc": balance_ue_lines[line]["balance_line"].long_desc,
+                        "amount": balance_ue_lines[line]["rounded_amount"],
+                        "accounts": balance_ue_lines[line]["account_list"],
+                    }
+                )
+            else:
+                for acc in balance_ue_lines[line]["account_list"]:
+                    if acc["amount"] != 0:
+                        acc_ignore += (
+                            "   "
+                            + acc["code"]
+                            + " "
+                            + acc["desc"]
+                            + ": "
+                            + format_decimal(
+                                acc["amount"],
+                                format="#,##0.00",
+                                locale="it_IT",
+                            )
+                            + "\n"
+                        )
+        if acc_ignore != "":
+            log_warnings += (
+                _("There are accounts to ignore but with non-zero amount:")
+                + "\n"
+                + acc_ignore
             )
         balance_state = "OK"
         log_env = self.env["account.balance.eu.log"]
@@ -426,9 +453,10 @@ class AccountBalanceEU(models.Model):
             != balance_ue_lines["PP"]["rounded_amount"]
         ):
             balance_state = "UNBALANCED"
-            log_warnings = (
-                "Bilancio NON quadrato: {:s} (Attivo) "
-                "- {:s} (Passivo) = {:s}".format(
+            log_warnings = log_warnings + (
+                _(
+                    "NON-SQUARE Balance: {:s} (Assets) - {:s} (Liabilities) = {:s}"
+                ).format(
                     format_decimal(
                         balance_ue_lines["PA"]["rounded_amount"],
                         format="#,##0.00",
@@ -440,7 +468,7 @@ class AccountBalanceEU(models.Model):
                         locale="it_IT",
                     ),
                     format_decimal(
-                        my_round(
+                        round_half_up(
                             balance_ue_lines["PA"]["rounded_amount"]
                             - balance_ue_lines["PP"]["rounded_amount"],
                             2,
@@ -450,13 +478,12 @@ class AccountBalanceEU(models.Model):
                     ),
                 )
             )
-        else:
-            log_warnings = ""
         if len(unlinked_account) > 0:
             balance_state = "UNLINKED_ACCOUNTS"
-            log_warnings += _(
-                "\nSono presenti conti non associati a nessuna voce di bilancio:\n"
+            log_warnings += (
+                "\n" + _("There are accounts not linked to any balance line:") + "\n"
             )
+
             for acc in unlinked_account:
                 account_id = (
                     self.env["account.account"]
@@ -472,14 +499,14 @@ class AccountBalanceEU(models.Model):
                 )
         log_warnings = log_warnings.strip()
         if log_warnings == "":
-            waring_lines = []
+            warning_lines = []
         else:
-            waring_lines = log_warnings.split("\n")
+            warning_lines = log_warnings.split("\n")
         data = {
             "form_data": form_data,
             "balance_ue_lines": balance_ue_lines_report_data,
             "balance_state": balance_state,
-            "warnings": waring_lines,
+            "warnings": warning_lines,
             "unlinked_account": unlinked_account,
         }
         return data
@@ -490,12 +517,12 @@ class AccountRefBalanceEU(models.Model):
     account_balance_eu_debit_id = fields.Many2one(
         "account.balance.eu",
         string="Debit (Balance EU)",
-        domain="[('child_ids','=',False)]",
+        domain="[('child_ids','=',False), ('code','not like', '%=%')]",
         help="Add this account in a Balance EU line amount DEBITS",
     )
     account_balance_eu_credit_id = fields.Many2one(
         "account.balance.eu",
         string="Credit (Balance EU)",
-        domain="[('child_ids','=',False)]",
+        domain="[('child_ids','=',False), ('code','not like', '%=%')]",
         help="Add this account in a Balance EU line amount CREDITS",
     )

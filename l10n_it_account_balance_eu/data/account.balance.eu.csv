@@ -280,3 +280,4 @@ E_F5,E.F5,imposte relative a esercizi precedenti,imposte relative a esercizi pre
 E_F6,E.F6,Imposte differite e anticipate,Imposte differite e anticipate,EC,E_F,285,,+,ImposteRedditoEsercizioCorrentiDifferiteAnticipateImposteDifferiteAnticipate
 E_F4,E.F4,Proventi (oneri) da adesione al regime di consolidato fiscale / trasparenza fiscale,d) Proventi (oneri) da adesione al regime di consolidato fiscale / trasparenza fiscale,EC,E_F,286,,+,ImposteRedditoEsercizioCorrentiDifferiteAnticipateProventiOneriAdesioneRegimeConsolidatoFiscaleTrasparenzaFiscale
 E=F,E=F,Utile (Perdita) dell' Esercizio,21) Utile (Perdita) dell'esercizio,EC,E,287,,+,UtilePerditaEsercizio
+--,--,Ignorare,Conti da ignorare (devono avere saldo zero),--,,999,,+,

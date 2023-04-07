@@ -96,7 +96,7 @@
                                 <span t-esc="line['desc']" />
                             </td>
                             <td style="text-align: right">
-                                <t t-if="form_data['default_balance_type']=='d'">
+                                <t t-if="form_data['values_precision']=='d'">
                                     <span
                                         t-esc="line['amount']"
                                         t-options='{"widget": "float", "precision": 2}'

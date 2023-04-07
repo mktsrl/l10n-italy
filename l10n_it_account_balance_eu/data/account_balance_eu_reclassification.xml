@@ -311,12 +311,12 @@
         <function
             model="account.balance.eu"
             name="account_balance_eu_debit_association"
-            eval="['2102%',ref('PP=A9')]"
+            eval="['2102%',ref('--')]"
         />
         <function
             model="account.balance.eu"
             name="account_balance_eu_debit_association"
-            eval="['2103%',ref('PP=A9')]"
+            eval="['2103%',ref('--')]"
         />
         <function
             model="account.balance.eu"
@@ -580,7 +580,11 @@
             name="account_balance_eu_debit_association"
             eval="['3111%',ref('E_A511')]"
         />
-
+        <function
+            model="account.balance.eu"
+            name="account_balance_eu_debit_association"
+            eval="['3112%',ref('E_A511')]"
+        />
 
         <function
             model="account.balance.eu"

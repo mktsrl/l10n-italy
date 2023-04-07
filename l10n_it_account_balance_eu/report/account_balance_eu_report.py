@@ -1,4 +1,10 @@
-from odoo import models
+from datetime import datetime
+
+from odoo import _, models
+
+
+def print_date(str_date):
+    return datetime.strptime(str_date, "%Y-%m-%d").strftime("%d/%m/%Y")
 
 
 class BalanceEuXlsxReport(models.AbstractModel):
@@ -8,21 +14,57 @@ class BalanceEuXlsxReport(models.AbstractModel):
 
     def generate_xlsx_report(self, workbook, data, record_data):
         balance_ue_data = self.env["account.balance.eu"].cal_balance_ue_data(data)
-        sheet = workbook.add_worksheet("Bilancio")
+        sheet = workbook.add_worksheet(_("Balance EU"))
         st_bold18 = workbook.add_format({"bold": True, "font_size": 18})
         sheet.write(0, 0, data["company_name"], st_bold18)
         sheet.set_row(0, 28)
         sheet.write(1, 0, data["address"] + " - " + data["city"])
-        sheet.write(2, 0, "Capitale sociale Euro " + str(data["rea_capital"]))
-        sheet.write(3, 0, "Bilancio", st_bold18)
-        sheet.set_row(3, 28)
+        sheet.write(2, 0, _("Social capital Euro ") + str(data["rea_capital"]))
+        sheet.write(4, 0, data["name"], st_bold18)
+        sheet.set_row(4, 28)
+        sheet.write(
+            5,
+            0,
+            _("from")
+            + " "
+            + print_date(data["date_from"])
+            + " "
+            + _("to")
+            + " "
+            + print_date(data["date_to"]),
+        )
+        str_opz = "(" + _("Values show as") + ": "
+        if data["values_precision"] == "d":
+            str_opz += _("2 decimals Euro")
+        else:  # "u"
+            str_opz += _("euro units")
+        str_opz += " / " + _("Hide account with amount 0") + ": "
+        if data["hide_acc_amount_0"]:
+            str_opz += _("YES")
+        else:
+            str_opz += _("NO")
+        str_opz += " / " + _("Use only posted registration") + ": "
+        if data["only_posted_move"]:
+            str_opz += _("YES")
+        else:
+            str_opz += _("NO")
+        str_opz += " / " + _("Ignore closing registration") + ": "
+        if data["ignore_closing_move"]:
+            str_opz += _("YES")
+        else:
+            str_opz += _("NO")
+        str_opz += ")"
+        st_bold9 = workbook.add_format({"font_size": 9})
+        sheet.write(6, 0, str_opz, st_bold9)
+
         col_title_style = workbook.add_format({"fg_color": "#729fcf"})
         col_title_center_style = workbook.add_format(
             {"fg_color": "#729fcf", "align": "center"}
         )
-        sheet.write(5, 0, "Descrizione", col_title_style)
-        sheet.write(5, 1, "Codice", col_title_style)
-        sheet.write(5, 2, str(data["year"]), col_title_center_style)
+        row_table_titles = 8
+        sheet.write(row_table_titles, 0, _("Description"), col_title_style)
+        sheet.write(row_table_titles, 1, _("Code"), col_title_style)
+        sheet.write(row_table_titles, 2, str(data["year"]), col_title_center_style)
         st_des = workbook.add_format({"num_format": "@"})
         st_account = workbook.add_format(
             {"italic": True, "font_size": 9, "fg_color": "#efefef"}
@@ -30,7 +72,7 @@ class BalanceEuXlsxReport(models.AbstractModel):
         st_acc_code = workbook.add_format(
             {"italic": True, "font_size": 9, "align": "right", "fg_color": "#efefef"}
         )
-        if data["default_balance_type"] == "d":
+        if data["values_precision"] == "d":
             amount_style = workbook.add_format({"num_format": "#,##0.00"})
             st_account_amount = workbook.add_format(
                 {
@@ -40,12 +82,12 @@ class BalanceEuXlsxReport(models.AbstractModel):
                     "num_format": "#,##0.00",
                 }
             )
-        elif data["default_balance_type"] == "u":
+        elif data["values_precision"] == "u":
             amount_style = workbook.add_format({"num_format": "#,##0"})
             st_account_amount = workbook.add_format(
                 {"font_size": 9, "fg_color": "#efefef", "num_format": "#,##0"}
             )
-        row = 6
+        row = row_table_titles + 1
         max_l_descr = 0
         max_l_importo = 0
         for line in balance_ue_data["balance_ue_lines"]:
@@ -144,7 +186,7 @@ class BalanceEuXBRLReport(models.AbstractModel):
             </context>""".format(
             i_year,
             balance_form_data["fiscalcode"],
-            balance_form_data["default_date_to"],
+            balance_form_data["date_to"],
         )
 
         xbrl += """
@@ -162,8 +204,8 @@ class BalanceEuXBRLReport(models.AbstractModel):
             </context>""".format(
             d_year,
             balance_form_data["fiscalcode"],
-            balance_form_data["default_date_from"],
-            balance_form_data["default_date_to"],
+            balance_form_data["date_from"],
+            balance_form_data["date_to"],
         )
         xbrl += """
             <unit id="eur">
@@ -245,7 +287,7 @@ class BalanceEuXBRLReport(models.AbstractModel):
             "DatiAnagraficiNumeroIscrizioneAlboCooperative", i_year, ""
         )
 
-        if balance_form_data["default_balance_type"] == "d":
+        if balance_form_data["values_precision"] == "d":
             decimal_precision = 2
         else:
             decimal_precision = 0

@@ -31,7 +31,7 @@ msgid "- REA:"
 msgstr ""
 
 #. module: l10n_it_account_balance_eu
-#: model:ir.model.fields.selection,name:l10n_it_account_balance_eu.selection__account_balance_eu_wizard__default_balance_type__d
+#: model:ir.model.fields.selection,name:l10n_it_account_balance_eu.selection__account_balance_eu_wizard__values_precision__d
 msgid "2 decimals Euro"
 msgstr "2 decimali di Euro"
 
@@ -126,12 +126,12 @@ msgid "Balance EU lines"
 msgstr "Voci Bilancio UE"
 
 #. module: l10n_it_account_balance_eu
-#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__default_date_from
+#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__date_from
 msgid "Balance from date"
 msgstr "Data inizio bilancio"
 
 #. module: l10n_it_account_balance_eu
-#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__default_date_to
+#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__date_to
 msgid "Balance to date"
 msgstr "Data fine bilancio"
 
@@ -281,12 +281,7 @@ msgid "Fiscal Code"
 msgstr "Codice Fiscale"
 
 #. module: l10n_it_account_balance_eu
-#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__date_from
-msgid "From date"
-msgstr "Data inizio"
-
-#. module: l10n_it_account_balance_eu
-#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__default_hide_acc_amount_0
+#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__hide_acc_amount_0
 msgid "Hide account with amount 0"
 msgstr "Nascondere conti a 0"
 
@@ -307,7 +302,7 @@ msgid "INCOME ACCOUNT"
 msgstr "CONTO ECONOMICO"
 
 #. module: l10n_it_account_balance_eu
-#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__default_ignore_closing_move
+#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__ignore_closing_move
 msgid "Ignore closing registration"
 msgstr "Ignora registrazioni di chiusura"
 
@@ -417,11 +412,6 @@ msgid "Subtract"
 msgstr "Sottrai"
 
 #. module: l10n_it_account_balance_eu
-#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__date_to
-msgid "To date"
-msgstr "Data fine"
-
-#. module: l10n_it_account_balance_eu
 #: model:ir.model.fields.selection,name:l10n_it_account_balance_eu.selection__account_balance_eu_wizard__state__unbalanced
 msgid "UNBALANCED"
 msgstr "NON QUADRATO"
@@ -437,7 +427,7 @@ msgid "Unlinked account in balance EU"
 msgstr "Conti non associati per bilancio UE"
 
 #. module: l10n_it_account_balance_eu
-#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__default_only_posted_move
+#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__only_posted_move
 msgid "Use only posted registration"
 msgstr "Solo registrazioni confermate"
 
@@ -452,7 +442,7 @@ msgid "VAT number nation"
 msgstr "Paese Partita IVA"
 
 #. module: l10n_it_account_balance_eu
-#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__default_balance_type
+#: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__values_precision
 msgid "Values show as"
 msgstr "Visualizza valori"
 
@@ -492,7 +482,7 @@ msgid "Zone"
 msgstr "Zona"
 
 #. module: l10n_it_account_balance_eu
-#: model:ir.model.fields.selection,name:l10n_it_account_balance_eu.selection__account_balance_eu_wizard__default_balance_type__u
+#: model:ir.model.fields.selection,name:l10n_it_account_balance_eu.selection__account_balance_eu_wizard__values_precision__u
 msgid "euro units"
 msgstr "unità di Euro"
 
@@ -512,10 +502,94 @@ msgid "to"
 msgstr "al"
 
 #. module: l10n_it_account_balance_eu
+#: code:account_balance_eu.py:0
+#, python-format
+msgid "NON-SQUARE Balance: {:s} (Assets) - {:s} (Liabilities) = {:s}"
+msgstr "Bilancio NON quadrato: {:s} (Attivo) - {:s} (Passivo) = {:s}"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu.py:0
+#, python-format
+msgid "There are accounts not linked to any balance line:"
+msgstr "Sono presenti conti non associati a nessuna voce di bilancio:"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu.py:0
+#, python-format
+msgid "There are accounts to ignore but with non-zero amount:"
+msgstr "Sono presenti conti da ignorare ma che hanno saldo diverso da zero:"
+
+#. module: l10n_it_account_balance_eu
 #: code:account_balance_eu_wizard.py:0
 #, python-format
 msgid "Balance EU"
 msgstr "Bilancio UE"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "from"
+msgstr "dal"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "to"
+msgstr "al"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "Social capital Euro "
+msgstr "Capitale sociale Euro "
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "Values show as"
+msgstr "Visualizza valori"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "YES"
+msgstr "SI"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "NO"
+msgstr ""
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "2 decimals Euro"
+msgstr "2 decimali di Euro"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "euro units"
+msgstr "unità di Euro"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "Hide account with amount 0"
+msgstr "Nascondere conti a 0"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "Use only posted registration"
+msgstr "Solo registrazioni confermate"
+
+#. module: l10n_it_account_balance_eu
+#: code:account_balance_eu_report.py:0
+#, python-format
+msgid "Ignore closing registration"
+msgstr "Ignora registrazioni di chiusura"
 
 #. module: l10n_it_account_balance_eu
 #. openerp-web

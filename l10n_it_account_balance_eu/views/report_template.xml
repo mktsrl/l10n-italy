@@ -16,16 +16,4 @@
             />
         </xpath>
     </template>
-    <template
-        id="l10n_it_account_balance_eu_assets_common"
-        name="l10n_it_account_balance_eu report_assets"
-        inherit_id="web.report_assets_common"
-    >
-        <xpath expr="." position="inside">
-            <script
-                type="text/javascript"
-                src="/l10n_it_account_balance_eu/static/src/js/report.js"
-            />
-        </xpath>
-    </template>
 </odoo>

@@ -29,9 +29,9 @@ class CreateBalanceWizard(models.TransientModel):
         string="Date range",
         default=_default_date_range,
     )
-    default_date_from = fields.Date(string="Balance from date", required=True)
-    default_date_to = fields.Date(string="Balance to date", required=True)
-    default_balance_type = fields.Selection(
+    date_from = fields.Date(string="Balance from date", required=True)
+    date_to = fields.Date(string="Balance to date", required=True)
+    values_precision = fields.Selection(
         [
             ("d", "2 decimals Euro"),
             ("u", "euro units"),
@@ -40,13 +40,13 @@ class CreateBalanceWizard(models.TransientModel):
         default="d",
         required=True,
     )
-    default_hide_acc_amount_0 = fields.Boolean(
+    hide_acc_amount_0 = fields.Boolean(
         string="Hide account with amount 0", default=True
     )
-    default_only_posted_move = fields.Boolean(
+    only_posted_move = fields.Boolean(
         string="Use only posted registration", default=True
     )
-    default_ignore_closing_move = fields.Boolean(
+    ignore_closing_move = fields.Boolean(
         string="Ignore closing registration", default=True
     )
     log_warnings = fields.Text(string="WARNING:", default="")
@@ -55,8 +55,6 @@ class CreateBalanceWizard(models.TransientModel):
     currency_id = fields.Many2one("res.currency", string="Currency")
     name = fields.Char(string="Name", compute="_compute_period_data")
     year = fields.Integer(string="Year", compute="_compute_period_data")
-    date_from = fields.Date(string="From date", compute="_compute_period_data")
-    date_to = fields.Date(string="To date", compute="_compute_period_data")
     # COMPANY DATA
     company_name = fields.Char(string="Company Name")
     address = fields.Char(string="Address")
@@ -89,14 +87,12 @@ class CreateBalanceWizard(models.TransientModel):
     @api.onchange("date_range_id")
     def onchange_date_range_id(self):
         """Handle date range change."""
-        self.default_date_from = self.date_range_id.date_start
-        self.default_date_to = self.date_range_id.date_end
+        self.date_from = self.date_range_id.date_start
+        self.date_to = self.date_range_id.date_end
 
-    @api.depends("date_range_id", "default_date_to", "default_date_from")
+    @api.depends("date_range_id", "date_to", "date_from")
     def _compute_period_data(self):
         for balance in self:
-            balance.date_to = balance.default_date_to
-            balance.date_from = balance.default_date_from
             balance.year = balance.date_to.year
             balance.name = _("Balance EU")
             if balance.date_to.month == balance.date_from.month:

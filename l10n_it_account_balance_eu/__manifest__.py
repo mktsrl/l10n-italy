@@ -14,6 +14,7 @@
     "depends": [
         "account",
         "date_range",
+        "l10n_it",
         "l10n_it_rea",
         "l10n_it_fiscalcode",
         "report_xlsx",
