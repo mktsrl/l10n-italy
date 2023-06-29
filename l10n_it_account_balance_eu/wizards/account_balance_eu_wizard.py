@@ -24,13 +24,23 @@ class CreateBalanceWizard(models.TransientModel):
             .id
         )
 
+    def _default_date_from(self):
+        return date(date.today().year - 1, 1, 1)
+
+    def _default_date_to(self):
+        return date(date.today().year - 1, 12, 31)      
+      
     date_range_id = fields.Many2one(
         comodel_name="date.range",
         string="Date range",
         default=_default_date_range,
     )
-    date_from = fields.Date(string="Balance from date", required=True)
-    date_to = fields.Date(string="Balance to date", required=True)
+    date_from = fields.Date(
+        string="Balance from date", required=True, default=_default_date_from
+    )
+    date_to = fields.Date(
+        string="Balance to date", required=True, default=_default_date_to
+    )
     values_precision = fields.Selection(
         [
             ("d", "2 decimals Euro"),

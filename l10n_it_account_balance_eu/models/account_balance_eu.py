@@ -4,10 +4,9 @@
 import logging
 import operator
 
-from babel.numbers import format_decimal
-
 from odoo import _, api, fields, models, tools
 from odoo.exceptions import ValidationError
+from odoo.tools.misc import formatLang
 
 _logger = logging.getLogger(__name__)
 
@@ -169,7 +168,7 @@ class AccountBalanceEU(models.Model):
     def get_account_list_amount(
         self,
         company_id,
-        currency_precision,
+        currency_id,
         date_from,
         date_to,
         only_posted_move,
@@ -181,6 +180,7 @@ class AccountBalanceEU(models.Model):
         balance_line_amount,
         account_list,
     ):
+        currency_precision = currency_id.decimal_places
         domain = []
         domain.append(("company_id", "=", company_id))
         self.add_calc_type_domain(domain, calc_type, account_balance_eu_id)
@@ -237,14 +237,26 @@ class AccountBalanceEU(models.Model):
                                 currency_precision,
                             )
                             if (
-                                (calc_type == "non_assoc")
+                                (calc_type == "non_assoc")  # and (acc_amount != 0)
                                 or (
                                     (calc_type == "d")
-                                    and ((acc_amount >= 0) or (not acc_credit_id))
+                                    and (
+                                        (
+                                            currency_id.compare_amounts(acc_amount, 0)
+                                            >= 0
+                                        )
+                                        or (not acc_credit_id)
+                                    )
                                 )
                                 or (
                                     (calc_type == "a")
-                                    and ((acc_amount < 0) or (not acc_debit_id))
+                                    and (
+                                        (
+                                            currency_id.compare_amounts(acc_amount, 0)
+                                            == -1
+                                        )
+                                        or (not acc_debit_id)
+                                    )
                                 )
                             ):
                                 if sign_display == "-":
@@ -279,9 +291,7 @@ class AccountBalanceEU(models.Model):
     def cal_balance_ue_data(self, form_data):
         balance_ue_lines = {}
         company_id = form_data["company_id"][0]
-        currency_precision = (
-            self.env["res.currency"].browse(form_data["currency_id"][0]).decimal_places
-        )
+        currency_id = self.env["res.currency"].browse(form_data["currency_id"][0])
         date_from = form_data["date_from"]
         date_to = form_data["date_to"]
         only_posted_move = form_data["only_posted_move"]
@@ -295,11 +305,11 @@ class AccountBalanceEU(models.Model):
             account_balance_eu_amount = 0
             account_list = []
             if not item.child_ids:
-                calcs = ["d", "a"]  # d=debit a=credit
-                for calc_type in calcs:
+                calcoli = ["d", "a"]  # d=debit a=credit
+                for calc_type in calcoli:
                     account_balance_eu_amount = self.get_account_list_amount(
                         company_id,
-                        currency_precision,
+                        currency_id,
                         date_from,
                         date_to,
                         only_posted_move,
@@ -410,11 +420,7 @@ class AccountBalanceEU(models.Model):
                             + " "
                             + acc["desc"]
                             + ": "
-                            + format_decimal(
-                                acc["amount"],
-                                format="#,##0.00",
-                                locale="it_IT",
-                            )
+                            + formatLang(acc["amount"], 2)
                             + "\n"
                         )
         if acc_ignore != "":
@@ -430,7 +436,7 @@ class AccountBalanceEU(models.Model):
         tot = 0
         self.get_account_list_amount(
             company_id,
-            currency_precision,
+            currency_id,
             date_from,
             date_to,
             only_posted_move,
@@ -451,24 +457,15 @@ class AccountBalanceEU(models.Model):
                 _(
                     "NON-SQUARE Balance: {:s} (Assets) - {:s} (Liabilities) = {:s}"
                 ).format(
-                    format_decimal(
-                        balance_ue_lines["PA"]["rounded_amount"],
-                        format="#,##0.00",
-                        locale="it_IT",
-                    ),
-                    format_decimal(
-                        balance_ue_lines["PP"]["rounded_amount"],
-                        format="#,##0.00",
-                        locale="it_IT",
-                    ),
-                    format_decimal(
+                    formatLang(balance_ue_lines["PA"]["rounded_amount"], 2),
+                    formatLang(balance_ue_lines["PP"]["rounded_amount"], 2),
+                    formatLang(
                         tools.float_round(
                             balance_ue_lines["PA"]["rounded_amount"]
                             - balance_ue_lines["PP"]["rounded_amount"],
                             2,
                         ),
-                        format="#,##0.00",
-                        locale="it_IT",
+                        2,
                     ),
                 )
             )

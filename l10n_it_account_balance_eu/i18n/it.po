@@ -409,6 +409,7 @@ msgstr "Segno (visualizzazione)"
 msgid "Share Capital"
 msgstr "Capitale sociale"
 
+
 #. module: l10n_it_account_balance_eu
 #: model:ir.model.fields,field_description:l10n_it_account_balance_eu.field_account_balance_eu_wizard__state
 msgid "State"
