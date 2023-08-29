@@ -100,7 +100,7 @@ class AccountMoveLine(models.Model):
             self.move_id.invoice_payment_term_id
             and self.move_id.invoice_payment_term_id.intrastat_code
         ):
-            payment_method = self.move_id.payment_term_id.intrastat_code
+            payment_method = self.move_id.invoice_payment_term_id.intrastat_code
         res.update({"payment_method": payment_method})
 
     def _prepare_intrastat_line_province_dest(self, company_id, res):
@@ -583,6 +583,7 @@ class AccountInvoiceIntrastat(models.Model):
         string="Transaction Nature B",
     )
     weight_kg = fields.Float(string="Net Mass (kg)")
+    show_weight = fields.Boolean(string="Display weight in declaration", default=True)
     additional_units = fields.Float(string="Additional Units")
     additional_units_uom = fields.Char(
         string="Additional Unit of Measure",

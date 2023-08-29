@@ -9,8 +9,8 @@
 
 {
     "name": "ITA - Ricevute bancarie",
-    "version": "14.0.1.2.1",
-    "development_status": "Alpha",
+    "version": "14.0.1.3.2",
+    "development_status": "Beta",
     "author": "Odoo Community Association (OCA)",
     "category": "Localization/Italy",
     "summary": "Ricevute bancarie",
@@ -18,6 +18,7 @@
     "license": "AGPL-3",
     "depends": [
         "account",
+        "account_due_list",
         "l10n_it_fatturapa_out",
         "l10n_it_fiscalcode",
         "base_iban",
