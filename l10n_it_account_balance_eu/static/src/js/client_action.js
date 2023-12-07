@@ -6,7 +6,7 @@ odoo.define("l10n_it_account_balance_eu.client_action", function (require) {
 
     var QWeb = core.qweb;
 
-    const AFRReportAction = ReportAction.extend({
+    const BalEUReportAction = ReportAction.extend({
         start: function () {
             return this._super.apply(this, arguments).then(() => {
                 this.$buttons = $(
@@ -56,7 +56,7 @@ odoo.define("l10n_it_account_balance_eu.client_action", function (require) {
             const action = {
                 name: this.name,
                 print_report_name:
-                    String(this.data.year) + "-XBRL-bilancio-esercizio.xbrl",
+                    String(this.data.year) + "-XBRL-financial-statements",
                 type: "ir.actions.report",
                 report_type: "qweb-xml",
                 report_name: "l10n_it_account_balance_eu.balance_eu_xbrl_report",
@@ -70,8 +70,8 @@ odoo.define("l10n_it_account_balance_eu.client_action", function (require) {
 
     core.action_registry.add(
         "l10n_it_account_balance_eu.client_action",
-        AFRReportAction
+        BalEUReportAction
     );
 
-    return AFRReportAction;
+    return BalEUReportAction;
 });

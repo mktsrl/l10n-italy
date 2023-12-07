@@ -36,17 +36,17 @@
                 <field name="name" />
                 <field name="code" />
                 <filter
-                    string="ASSETS (Patrimonial)"
-                    name="Attivo"
+                    string="ASSETS (Balance Sheet)"
+                    name="Assets"
                     domain="[('zone_bal','=','PA')]"
                 />
                 <filter
-                    string="LIABILITIES (Patrimonial)"
-                    name="Passivo"
+                    string="LIABILITIES (Balance Sheet)"
+                    name="Liabilities"
                     domain="[('zone_bal','=','PP')]"
                 />
                 <filter
-                    string="INCOME ACCOUNT"
+                    string="INCOME STATEMENT"
                     name="Economico"
                     domain="[('zone_bal','=','EC')]"
                 />
@@ -71,7 +71,7 @@
     </record>
 
     <record id="account_balance_eu_act_window" model="ir.actions.act_window">
-        <field name="name">Balance UE lines</field>
+        <field name="name">Balance EU lines</field>
         <field name="res_model">account.balance.eu</field>
         <field name="view_mode">tree,form</field>
         <field name="domain">[]</field>
@@ -79,7 +79,7 @@
     </record>
 
     <record id="account_balance_eu_menu" model="ir.ui.menu">
-        <field name="name">Balance UE lines</field>
+        <field name="name">Balance EU lines</field>
         <field name="parent_id" ref="account.account_account_menu" />
         <field name="action" ref="account_balance_eu_act_window" />
         <field name="sequence" eval="16" />
@@ -91,7 +91,7 @@
         <field name="inherit_id" ref="account.view_account_form" />
         <field name="arch" type="xml">
             <xpath expr="//group" position="after">
-                <separator string="Link to Balance UE" />
+                <separator string="Link to Balance EU" />
                 <group name="gr_bil_ue">
                     <group>
                         <field name="account_balance_eu_debit_id" />

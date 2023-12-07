@@ -674,7 +674,6 @@ msgstr ""
 
 #. module: l10n_it_fatturapa
 #: model:ir.model.fields,help:l10n_it_fatturapa.field_fatturapa_attachment__message_has_error
-#: model:ir.model.fields,help:l10n_it_fatturapa.field_fatturapa_attachment__message_has_sms_error
 msgid "If checked, some messages have a delivery error."
 msgstr ""
 
@@ -781,6 +780,12 @@ msgstr ""
 #. module: l10n_it_fatturapa
 #: model:ir.model,name:l10n_it_fatturapa.model_account_move_line
 msgid "Journal Item"
+msgstr ""
+
+#. module: l10n_it_fatturapa
+#: model:ir.model.fields,field_description:l10n_it_fatturapa.field_fatturapa_attachment__key
+#: model:ir.model.fields,field_description:l10n_it_fatturapa.field_fatturapa_attachments__key
+msgid "Key"
 msgstr ""
 
 #. module: l10n_it_fatturapa
@@ -1374,11 +1379,6 @@ msgid "Rounding"
 msgstr ""
 
 #. module: l10n_it_fatturapa
-#: model:ir.model.fields,field_description:l10n_it_fatturapa.field_fatturapa_attachment__message_has_sms_error
-msgid "SMS Delivery error"
-msgstr ""
-
-#. module: l10n_it_fatturapa
 #: model:ir.model,name:l10n_it_fatturapa.model_fatturapa_attachment
 #: model_terms:ir.ui.view,arch_db:l10n_it_fatturapa.fatturapa_attachment_view_form
 msgid "SdI file"
@@ -1463,6 +1463,14 @@ msgid "Tax Representative"
 msgstr ""
 
 #. module: l10n_it_fatturapa
+#: model:ir.model.fields,help:l10n_it_fatturapa.field_fatturapa_attachment__key
+#: model:ir.model.fields,help:l10n_it_fatturapa.field_fatturapa_attachments__key
+msgid ""
+"Technical field used to resolve multiple attachments in a multi-website "
+"environment."
+msgstr ""
+
+#. module: l10n_it_fatturapa
 #: model:ir.model.fields,help:l10n_it_fatturapa.field_res_partner__codice_destinatario
 #: model:ir.model.fields,help:l10n_it_fatturapa.field_res_users__codice_destinatario
 msgid ""
@@ -1506,6 +1514,12 @@ msgstr ""
 #: model:ir.model.fields,help:l10n_it_fatturapa.field_fatturapa_attachment__res_id
 #: model:ir.model.fields,help:l10n_it_fatturapa.field_fatturapa_attachments__res_id
 msgid "The record id this is attached to."
+msgstr ""
+
+#. module: l10n_it_fatturapa
+#: model:ir.model.fields,field_description:l10n_it_fatturapa.field_fatturapa_attachment__theme_template_id
+#: model:ir.model.fields,field_description:l10n_it_fatturapa.field_fatturapa_attachments__theme_template_id
+msgid "Theme Template"
 msgstr ""
 
 #. module: l10n_it_fatturapa
@@ -1593,8 +1607,20 @@ msgid "Vehicle Registration"
 msgstr ""
 
 #. module: l10n_it_fatturapa
+#: model:ir.model.fields,field_description:l10n_it_fatturapa.field_fatturapa_attachment__website_id
+#: model:ir.model.fields,field_description:l10n_it_fatturapa.field_fatturapa_attachments__website_id
+msgid "Website"
+msgstr ""
+
+#. module: l10n_it_fatturapa
 #: model:ir.model.fields,field_description:l10n_it_fatturapa.field_fatturapa_attachment__website_message_ids
 msgid "Website Messages"
+msgstr ""
+
+#. module: l10n_it_fatturapa
+#: model:ir.model.fields,field_description:l10n_it_fatturapa.field_fatturapa_attachment__website_url
+#: model:ir.model.fields,field_description:l10n_it_fatturapa.field_fatturapa_attachments__website_url
+msgid "Website URL"
 msgstr ""
 
 #. module: l10n_it_fatturapa
