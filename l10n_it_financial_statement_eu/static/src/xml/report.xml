@@ -1,11 +1,12 @@
-<template>
-    <!-- Buttons of the Control Panel -->
+<?xml version="1.0" encoding="utf-8"?>
+<templates>
     <t
-        t-name="info.ReportAction"
+        t-name="l10n_it_financial_statement_eu.FSEUReportButtons"
         t-inherit="web.ReportAction"
-        t-inherit-mode="extension"
+        t-inherit-mode="primary"
         owl="1"
     >
+        <!-- Buttons of the Control Panel -->
         <xpath expr="//button" position="after">
             <button
                 t-if="isFinancialStatementEU"
@@ -23,4 +24,4 @@
             >Export XBRL</button>
         </xpath>
     </t>
-</template>
+</templates>

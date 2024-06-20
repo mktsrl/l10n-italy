@@ -1,10 +1,11 @@
 /** @odoo-module **/
 import {ReportAction} from "@web/webclient/actions/reports/report_action";
-import {patch} from "web.utils";
+//import {patch} from "web.utils";
 
 const MODULE_NAME = "l10n_it_financial_statement_eu";
 
-patch(ReportAction.prototype, "l10n_it_financial_statement_eu.ReportAction", {
+//patch(ReportAction.prototype, "l10n_it_financial_statement_eu.ReportAction", {
+export class FSEUReportAction extends ReportAction {
     setup() {
         this._super.apply(this, arguments);
         this.isFinancialStatementEU = this.props.report_name.startsWith(
@@ -36,3 +37,5 @@ patch(ReportAction.prototype, "l10n_it_financial_statement_eu.ReportAction", {
         });
     },
 });
+FSEUReportAction.template = "l10n_it_financial_statement_eu.FSEUReportButtons";
+
